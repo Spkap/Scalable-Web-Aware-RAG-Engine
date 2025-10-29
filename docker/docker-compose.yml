@@ -1,0 +1,150 @@
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: webrag_api
+    env_file:
+      - ../.env
+    ports:
+      - '${API_PORT:-8000}:8000'
+    depends_on:
+      qdrant:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: always
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8000/health || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  worker:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: webrag_worker_1
+    env_file:
+      - ../.env
+    command:
+      [
+        'celery',
+        '-A',
+        'app.celery_app.celery_app',
+        'worker',
+        '--loglevel=INFO',
+        '--concurrency=1',
+      ]
+    depends_on:
+      qdrant:
+        condition: service_started
+      redis:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: ['CMD', 'redis-cli', '-h', 'redis', 'ping']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  worker_replica:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: webrag_worker_2
+    env_file:
+      - ../.env
+    command:
+      [
+        'celery',
+        '-A',
+        'app.celery_app.celery_app',
+        'worker',
+        '--loglevel=INFO',
+        '--concurrency=1',
+      ]
+    depends_on:
+      qdrant:
+        condition: service_started
+      redis:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: ['CMD', 'redis-cli', '-h', 'redis', 'ping']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  flower:
+    # Use the official Flower image pinned to a stable tag to ensure the `flower` CLI is available.
+    image: mher/flower:0.9.7
+    container_name: webrag_flower
+    env_file:
+      - ../.env
+    command: ['flower', '--port=5555', '--broker=${CELERY_BROKER_URL}']
+    ports:
+      - '5555:5555'
+    depends_on:
+      - redis
+    restart: always
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:5555 || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: webrag_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ../scripts/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql:ro
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    restart: always
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} -h localhost',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: webrag_redis
+    command: ['redis-server', '--save', '', '--appendonly', 'no']
+    ports:
+      - '${REDIS_PORT:-6379}:6379'
+    restart: always
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  qdrant:
+    image: qdrant/qdrant:v1.7.4
+    container_name: webrag_qdrantf
+    ports:
+      - '${QDRANT_PORT:-6333}:6333'
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    restart: always
+
+volumes:
+  pgdata:
+  qdrant_storage:

@@ -1,0 +1,81 @@
+.venv/
+venv/
+env/
+
+# Environment files (do NOT commit secrets)
+.env
+.env.*
+
+# Python cache / artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.mypy_cache/
+.pytest_cache/
+
+# Byte-compiled / optimized / DLL files
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+*.egg
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Editor directories and files
+.vscode/
+.idea/
+.ropeproject/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Test / coverage
+.coverage
+coverage.xml
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints
+
+# Database files
+*.sqlite3
+*.db
+
+# Docker
+docker-compose.override.yml
+**/docker-compose.override.yml
+
+# Secrets / keys
+*.pem
+*.key
+*.crt
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Misc caches
+.cache/
+__pycache__/
+
+# Node / frontend
+node_modules/
+
+# Generated Sphinx docs
+docs/_build/
+
+# Coverage and profiling
+profiler.out
+
