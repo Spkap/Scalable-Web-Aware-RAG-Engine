@@ -79,43 +79,37 @@ Built for AiRA assessment, October 2025.
 Below is a Mermaid diagram showing the system components and data flows. It illustrates client interactions, FastAPI server, Redis, Celery workers, PostgreSQL, Qdrant, and Google Gemini APIs.
 
 ```mermaid
-flowchart LR
+flowchart TD
   subgraph Client
-    A[User / Client] -->|HTTP| B[FastAPI API]
+    A[User / Client] -->|"HTTP"| B[FastAPI API]
   end
-
-  B -->|POST ingest-url| C[Enqueue Job in Redis]
-  B -->|POST query| D[Query Handler]
-  B -->|GET /status| E[Status Handler]
-
-  C -->|Redis Queue| F[Celery Worker 1]
-  C -->|Redis Queue| G[Celery Worker 2]
-  F -->|fetch url & chunk| H[Content Processor]
-  G -->|embed chunks| I[Embeddings Service]
-
-  H -->|chunks| I
-  I -->|embeddings (1536-d)| J[Qdrant Vector DB]
-  H -->|metadata| K[PostgreSQL]
-
-  D -->|top_k vectors| J
-  J -->|nearest neighbors| L[Re-ranker & Generator]
-  L -->|call| M[Gemini 2.5 Flash API]
-  L -->|return| B
-
-  K ---|job status| E
-
+  B -->|"POST ingest-url"| C[Enqueue Job in Redis]
+  B -->|"POST query"| D[Query Handler]
+  B -->|"GET /status"| E[Status Handler]
+  C -->|"Redis Queue"| F[Celery Worker 1]
+  C -->|"Redis Queue"| G[Celery Worker 2]
+  F -->|"fetch url & chunk"| H[Content Processor]
+  G -->|"embed chunks"| I[Embeddings Service]
+  H -->|"chunks"| I
+  I -->|"embeddings (1536-d)"| J[Qdrant Vector DB]
+  H -->|"metadata"| K[PostgreSQL]
+  D -->|"top_k vectors"| J
+  J -->|"nearest neighbors"| L[Re-ranker & Generator]
+  L -->|"call"| M[Gemini 2.5 Flash API]
+  L -->|"return"| B
+  K ---|"job status"| E
   subgraph Google
-    I2[Gemini Embedding API\n(gemini-embedding-001, 1536-d)]
-    M2[Gemini 2.5 Flash\n(LLM)]
+    I2["Gemini Embedding API\n(gemini-embedding-001, 1536-d)"]
+    M2["Gemini 2.5 Flash\n(LLM)"]
   end
-
-  I -->|API calls| I2
-  L -->|API calls| M2
-
+  I -->|"API calls"| I2
+  L -->|"API calls"| M2
   style J fill:#f9f,stroke:#333,stroke-width:1px
   style K fill:#bbf,stroke:#333,stroke-width:1px
   style F fill:#efe,stroke:#333,stroke-width:1px
   style G fill:#efe,stroke:#333,stroke-width:1px
+
+
 ```
 
 ### Component Interaction
