@@ -7,12 +7,15 @@ and the API is reachable at http://localhost:8000.
 """
 from __future__ import annotations
 
+import os
 import pytest
 import requests
 import time
 import uuid
 
-BASE_URL = "http://localhost:8001"
+# Allow overriding the integration test target via environment variable.
+# Default: http://localhost:8000
+BASE_URL = os.environ.get("WEBRAG_BASE_URL", "http://localhost:8000")
 TEST_TIMEOUT = 60
 
 

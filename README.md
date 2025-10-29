@@ -663,7 +663,7 @@ QDRANT_COLLECTION=web_documents
 
 # Embedding settings
 EMBEDDING_MODEL=gemini-embedding-001
-EMBEDDING_DIMENSION=1536 # Critical: using 1536 for optimal quality/storage
+EMBEDDING_DIMENSIONS=1536 # Critical: using 1536 for optimal quality/storage
 CHUNK_SIZE=800
 CHUNK_OVERLAP=100
 
@@ -882,7 +882,16 @@ Database and Qdrant scaling:
 
 Run the integration test suite:
 
+Note: the integration tests read the API base URL from the environment variable `WEBRAG_BASE_URL`.
+By default the tests target `http://localhost:8000`. If your API runs on a different port (for example
+`8001` in some developer setups), set the environment variable before running tests.
+
 ```bash
+# run tests against the default API URL (http://localhost:8000)
+python -m pytest tests/test_integration.py -v
+
+# or run against a different API host/port (example: localhost:8001)
+export WEBRAG_BASE_URL="http://localhost:8001"
 python -m pytest tests/test_integration.py -v
 ```
 
@@ -955,7 +964,7 @@ curl -X POST http://localhost:8000/query \
 
 ### Issue: "Embedding dimension mismatch"
 
-**Solution:** Verify `EMBEDDING_DIMENSION=1536` in `.env` and ensure Qdrant collection `vector_size` is 1536.
+**Solution:** Verify `EMBEDDING_DIMENSIONS=1536` in `.env` (note the plural) and ensure Qdrant collection `vector_size` is 1536.
 
 ### Issue: "No documents found"
 
