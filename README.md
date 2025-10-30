@@ -921,17 +921,7 @@ curl -X POST http://localhost:8000/query \
 
 ## Demo Video
 
-📹 **Demo Video:** [Link to 5-10 minute video]
-
-**Video Contents:**
-
-1. Architecture overview (1 min)
-2. Starting services with Docker (1 min)
-3. Ingesting URL via /ingest-url (2 min)
-4. Monitoring with /status and Flower (1 min)
-5. Querying with /query endpoint (2 min)
-6. Showing Qdrant vectors (1536-dim) (1 min)
-7. Design decisions explanation (1-2 min)
+📹 **Demo Video:** Will update in a while
 
 ## Future Improvements
 
