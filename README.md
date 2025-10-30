@@ -1,6 +1,7 @@
 # WebRAG - Scalable Web-Aware RAG Engine
 
-> A production-oriented Retrieval-Augmented Generation (RAG) engine for web content, optimized with Google Gemini embeddings (gemini-embedding-001 @ 1536 dimensions) and Gemini 2.5 Flash LLM.
+> **Problem:** Large Language Models often lack up-to-date, domain-specific knowledge and can "hallucinate" answers.
+> **Solution:** WebRAG provides a production-ready, web-aware Retrieval-Augmented Generation (RAG) engine that ingests web content, grounds LLM responses in factual data, and provides verifiable sources. It's optimized for scalability and responsiveness, aligning with AiRA's need for advanced AI infrastructure.
 
 ## 📋 Table of Contents
 
@@ -35,13 +36,13 @@
   - [Ingest a Wikipedia Article](#example-1-ingest-wikipedia-article)
   - [Check Processing Status](#example-2-check-processing-status)
   - [Query Knowledge Base](#example-3-query-knowledge-base)
-- [Design Decisions](#design-decisions)
+- [Key Design Choices](#key-design-choices)
   - [Why Gemini embedding-001 with 1536 Dimensions?](#why-gemini-embedding-001-with-1536-dimensions)
   - [Why Async Architecture?](#why-async-architecture)
   - [Why Qdrant over FAISS/ChromaDB?](#why-qdrant-over-faisschromadb)
   - [Why PostgreSQL for Metadata?](#why-postgresql-for-metadata)
   - [Chunking Strategy](#chunking-strategy)
-- [Scalability & Production](#scalability--production)
+- [Implementing Scalability and Production Readiness](#implementing-scalability-and-production-readiness)
   - [Horizontal Scaling](#horizontal-scaling)
   - [Performance Optimization](#performance-optimization)
   - [Monitoring](#monitoring)
@@ -76,7 +77,7 @@ Built for AiRA assessment, October 2025.
 
 ### High-Level System Diagram
 
-Below is a Mermaid diagram showing the system components and data flows. It illustrates client interactions, FastAPI server, Redis, Celery workers, PostgreSQL, Qdrant, and Google Gemini APIs.
+This diagram visually represents the end-to-end data flow and component interactions within WebRAG. It illustrates how client requests are processed through the FastAPI API, managed by Celery and Redis, stored in PostgreSQL and Qdrant, and leverage Google Gemini APIs for embeddings and LLM interactions.
 
 ```mermaid
 flowchart TD
@@ -135,7 +136,7 @@ Query pipeline (step-by-step):
 
 ## ASCII Block Diagrams (text-first diagrams)
 
-The following ASCII/block diagrams provide a compact, text-first view of the system for reviewers who prefer plain-text architecture over rendered diagrams. These are intentionally exact to the project's stack and configuration.
+These ASCII/block diagrams offer a compact, text-first representation of the system's architecture and workflows. They are particularly useful for quick comprehension, documentation in text-only environments, and for reviewers who prefer a direct, unrendered view of the project's stack and configuration.
 
 ### Client Layer & Core Components
 
@@ -339,6 +340,8 @@ CRITICAL: In the Embeddings row, note explicitly:
 - Reference: https://ai.google.dev/gemini-api/docs/embeddings
 
 ## System Design
+
+This section details the architectural choices and structural organization that define the WebRAG engine, illustrating how we've approached building a robust and efficient system.
 
 ### Architecture Patterns
 
@@ -773,19 +776,19 @@ Response:
 }
 ```
 
-## Design Decisions
+## Key Design Choices
 
 ### 1. Why Gemini embedding-001 with 1536 Dimensions?
 
 **Decision:** Use gemini-embedding-001 with output_dimensionality=1536.
 
-**Rationale:**
+**Rationale:** This decision directly addresses AiRA's need for advanced AI infrastructure that balances performance, cost-efficiency, and quality.
 
 - **Quality:** MTEB score of 68.17—empirically equivalent to 3072 dimensions for retrieval tasks.
-- **Efficiency:** 1536 provides ~50% lower storage footprint vs 3072-dim vectors.
+- **Efficiency:** 1536 provides ~50% lower storage footprint vs 3072-dim vectors, contributing to a scalable and cost-effective solution.
 - **Cost:** Reduced memory and compute costs for vector storage and similarity search.
-- **Ecosystem:** Native integration and compatibility with Gemini 2.5 Flash LLM.
-- **Practicality:** Faster batch embedding throughput and lower network egress for embeddings transfers.
+- **Ecosystem:** Native integration and compatibility with Gemini 2.5 Flash LLM, streamlining the AI stack.
+- **Practicality:** Faster batch embedding throughput and lower network egress for embeddings transfers, enhancing overall system responsiveness.
 
 **Benchmark Evidence:** Based on Google's public embedding APIs and MTEB results, 1536-dim embeddings match the 3072-dim score (68.17) while reducing storage by half.
 
@@ -793,11 +796,11 @@ Response:
 
 **Decision:** FastAPI for the HTTP layer + Celery + Redis for background processing.
 
-**Rationale:**
+**Rationale:** This directly addresses AiRA's requirement for "scalable and reliable backend components in Python (FastAPI, asyncio) to support real-time user interactions" and their explicit request for asynchronous systems.
 
-- AiRA requested async systems.
-- Ensures non-blocking calls: ingestion returns quickly while work is done in background.
-- Workers are horizontally scalable and can be monitored with Flower.
+- **Responsiveness:** Ensures non-blocking API calls, allowing ingestion requests to return quickly (202 Accepted) while I/O-heavy work is performed in the background.
+- **Scalability:** Celery workers are horizontally scalable, enabling the system to handle increased load by simply adding more workers.
+- **Observability:** Workers can be monitored effectively with tools like Flower, crucial for production environments.
 
 ### 3. Why Qdrant over FAISS/ChromaDB?
 
@@ -813,17 +816,17 @@ Response:
 | REST API           |     ✅ |                                         ❌ |       ✅ |
 | 1536-dim support   |     ✅ |                                         ✅ |       ✅ |
 
-Qdrant provides a managed-like developer experience with persistence, metadata filters, and an HTTP API that simplifies integration.
+**Rationale:** Qdrant was chosen to meet AiRA's need for robust and scalable vector storage within a production RAG pipeline. It provides a production-ready, managed-like developer experience with persistence, powerful metadata filtering capabilities (essential for contextual retrieval), and a convenient HTTP API that simplifies integration and operational management compared to other options.
 
 ### 4. Why PostgreSQL for Metadata?
 
 **Decision:** PostgreSQL for ingestion job metadata and audit trails.
 
-**Rationale:**
+**Rationale:** PostgreSQL was selected to provide robust and reliable storage for job metadata and audit trails, aligning with AiRA's need for dependable backend components.
 
-- ACID guarantees for job state transitions
-- Powerful querying (indexed fields + JSONB)
-- Reliability and easy backup / restore
+- **ACID Guarantees:** Ensures data integrity for critical job state transitions.
+- **Powerful Querying:** Supports complex queries with indexed fields and flexible JSONB columns for diverse metadata.
+- **Reliability & Operations:** Offers high reliability, transactional safety, and straightforward backup/restore procedures, essential for production systems.
 
 ### 5. Chunking Strategy
 
@@ -833,9 +836,9 @@ Qdrant provides a managed-like developer experience with persistence, metadata f
 - Overlap: 100 tokens
 - Splitter: RecursiveCharacterTextSplitter
 
-**Rationale:** Keeps chunks within common context windows, overlap prevents information loss at boundaries, and recursive splitting preserves semantic coherence.
+**Rationale:** This strategy is optimized to create effective context for the LLM, balancing the need to fit within prompt limits with preserving semantic meaning. The overlap prevents loss of critical information at chunk boundaries, while recursive splitting respects the document's inherent structure.
 
-## Scalability & Production
+## Implementing Scalability and Production Readiness
 
 ### Horizontal Scaling
 
@@ -925,6 +928,8 @@ curl -X POST http://localhost:8000/query \
 
 ## Future Improvements
 
+This section outlines potential enhancements and strategic directions for the WebRAG engine, demonstrating a forward-thinking approach and a roadmap for continuous development and optimization.
+
 1. Hybrid Search (BM25 + semantic) for improved precision
 2. Query caching in Redis for hot queries
 3. Semantic chunking based on topics or headings
@@ -937,6 +942,8 @@ curl -X POST http://localhost:8000/query \
 10. A/B testing for embedding dimensionality and re-ranking strategies
 
 ## Technical Highlights
+
+This section summarizes the key technical achievements and differentiators of the WebRAG project, showcasing its alignment with modern AI engineering best practices and AiRA's requirements.
 
 1. ✅ Optimal Embedding Configuration: gemini-embedding-001 @ 1536 dimensions — full quality, half storage
 2. ✅ True Async Architecture: Non-blocking FastAPI endpoints with Celery background workers
