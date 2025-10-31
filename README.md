@@ -1,7 +1,7 @@
 # WebRAG - Scalable Web-Aware RAG Engine
 
 > **Problem:** Large Language Models often lack up-to-date, domain-specific knowledge and can "hallucinate" answers.
-> **Solution:** WebRAG provides a production-ready, web-aware Retrieval-Augmented Generation (RAG) engine that ingests web content, grounds LLM responses in factual data, and provides verifiable sources. It's optimized for scalability and responsiveness, aligning with AiRA's need for advanced AI infrastructure.
+> **Solution:** WebRAG provides a production-ready, web-aware Retrieval-Augmented Generation (RAG) engine that ingests web content, grounds LLM responses in factual data, and provides verifiable sources. It's optimized for scalability and responsiveness.
 
 ## 📋 Table of Contents
 
@@ -55,11 +55,10 @@
 - [Technical Highlights](#technical-highlights)
 - [Troubleshooting](#troubleshooting)
 - [License](#license)
-- [Contact](#contact)
 
 ## Overview
 
-WebRAG is a scalable, web-aware Retrieval-Augmented Generation engine built as an end-to-end demonstration for AiRA's technical assessment (October 2025). It ingests web pages, converts them into high-quality vector embeddings using Google Gemini embedding-001 (configured to 1536 dimensions), stores vectors in Qdrant, and serves queries via a FastAPI-based HTTP API. The ingestion pipeline is asynchronous (FastAPI + Celery + Redis) to ensure responsive user interactions and robust background processing.
+WebRAG is a scalable, web-aware Retrieval-Augmented Generation engine. It ingests web pages, converts them into high-quality vector embeddings using Google Gemini embedding-001 (configured to 1536 dimensions), stores vectors in Qdrant, and serves queries via a FastAPI-based HTTP API. The ingestion pipeline is asynchronous (FastAPI + Celery + Redis) to ensure responsive user interactions and robust background processing.
 
 Key features:
 
@@ -70,8 +69,6 @@ Key features:
 - PostgreSQL for job metadata and audit trails
 - Docker Compose deployment for reproducible environments
 - Full API docs, curl examples, health checks, and monitoring hooks
-
-Built for AiRA assessment, October 2025.
 
 ## Architecture
 
@@ -782,7 +779,7 @@ Response:
 
 **Decision:** Use gemini-embedding-001 with output_dimensionality=1536.
 
-**Rationale:** This decision directly addresses AiRA's need for advanced AI infrastructure that balances performance, cost-efficiency, and quality.
+**Rationale:** This decision balances performance, cost-efficiency, and quality.
 
 - **Quality:** MTEB score of 68.17—empirically equivalent to 3072 dimensions for retrieval tasks.
 - **Efficiency:** 1536 provides ~50% lower storage footprint vs 3072-dim vectors, contributing to a scalable and cost-effective solution.
@@ -796,7 +793,7 @@ Response:
 
 **Decision:** FastAPI for the HTTP layer + Celery + Redis for background processing.
 
-**Rationale:** This directly addresses AiRA's requirement for "scalable and reliable backend components in Python (FastAPI, asyncio) to support real-time user interactions" and their explicit request for asynchronous systems.
+**Rationale:** This addresses the requirement for "scalable and reliable backend components in Python (FastAPI, asyncio) to support real-time user interactions" and the explicit request for asynchronous systems.
 
 - **Responsiveness:** Ensures non-blocking API calls, allowing ingestion requests to return quickly (202 Accepted) while I/O-heavy work is performed in the background.
 - **Scalability:** Celery workers are horizontally scalable, enabling the system to handle increased load by simply adding more workers.
@@ -816,13 +813,13 @@ Response:
 | REST API           |     ✅ |                                         ❌ |       ✅ |
 | 1536-dim support   |     ✅ |                                         ✅ |       ✅ |
 
-**Rationale:** Qdrant was chosen to meet AiRA's need for robust and scalable vector storage within a production RAG pipeline. It provides a production-ready, managed-like developer experience with persistence, powerful metadata filtering capabilities (essential for contextual retrieval), and a convenient HTTP API that simplifies integration and operational management compared to other options.
+**Rationale:** Qdrant was chosen for robust and scalable vector storage within a production RAG pipeline. It provides a production-ready, managed-like developer experience with persistence, powerful metadata filtering capabilities (essential for contextual retrieval), and a convenient HTTP API that simplifies integration and operational management compared to other options.
 
 ### 4. Why PostgreSQL for Metadata?
 
 **Decision:** PostgreSQL for ingestion job metadata and audit trails.
 
-**Rationale:** PostgreSQL was selected to provide robust and reliable storage for job metadata and audit trails, aligning with AiRA's need for dependable backend components.
+**Rationale:** PostgreSQL was selected to provide robust and reliable storage for job metadata and audit trails.
 
 - **ACID Guarantees:** Ensures data integrity for critical job state transitions.
 - **Powerful Querying:** Supports complex queries with indexed fields and flexible JSONB columns for diverse metadata.
@@ -943,7 +940,7 @@ This section outlines potential enhancements and strategic directions for the We
 
 ## Technical Highlights
 
-This section summarizes the key technical achievements and differentiators of the WebRAG project, showcasing its alignment with modern AI engineering best practices and AiRA's requirements.
+This section summarizes the key technical achievements and differentiators of the WebRAG project, showcasing its alignment with modern AI engineering best practices.
 
 1. ✅ Optimal Embedding Configuration: gemini-embedding-001 @ 1536 dimensions — full quality, half storage
 2. ✅ True Async Architecture: Non-blocking FastAPI endpoints with Celery background workers
@@ -972,10 +969,4 @@ This section summarizes the key technical achievements and differentiators of th
 ## License
 
 MIT License
-
-## Contact
-
-**Project:** WebRAG - AiRA Technical Assessment  
-**Date:** October 2025
-
 ---
