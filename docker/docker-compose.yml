@@ -138,7 +138,7 @@ services:
 
   qdrant:
     image: qdrant/qdrant:v1.7.4
-    container_name: webrag_qdrantf
+    container_name: webrag_qdrant
     ports:
       - '${QDRANT_PORT:-6333}:6333'
     volumes:
