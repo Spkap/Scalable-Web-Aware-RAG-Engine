@@ -86,6 +86,7 @@ services:
     # Use the official Flower image pinned to a stable tag to ensure the `flower` CLI is available.
     image: mher/flower:0.9.7
     container_name: webrag_flower
+    platform: linux/amd64
     env_file:
       - ../.env
     command: ['flower', '--port=5555', '--broker=${CELERY_BROKER_URL}']
